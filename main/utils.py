@@ -34,12 +34,13 @@ def make_model_file_param_args(params, spa_enc_type, get_unsuper_model_path=Fals
         cnnmodel_name = ""
     else:
         cnnmodel_name = params["cnn_model"] + "_"
-    param_args = "{cnnmodel_name:s}{lr:.{lr_f}f}_{freq:d}_{min_radius:.7f}_{num_hidden_layer:d}_{hidden_dim:d}".format(
+    param_args = "{cnnmodel_name:s}{lr:.{lr_f}f}_{freq:d}_{min_radius:.7f}_{max_radius:.3f}_{num_hidden_layer:d}_{hidden_dim:d}".format(
         cnnmodel_name=cnnmodel_name,
         lr=params["lr"],
         lr_f=lr_f,
         freq=params["frequency_num"],
         min_radius=params["min_radius"],
+        max_radius=params["max_radius"],
         num_hidden_layer=params["num_hidden_layer"],
         hidden_dim=params["hidden_dim"],
     )

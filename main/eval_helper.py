@@ -59,6 +59,7 @@ def compute_acc_batch(
         if val_preds is not None:
             cnn_pred = val_preds[inds, :]
         else:
+            return
             cnn_pred = None
             assert prior_type != "no_prior"
 
@@ -186,15 +187,16 @@ def compute_acc_batch(
     # preds: (num_sample, num_classes)
     preds = np.concatenate(pred_list, axis=0)
     # logger.info(preds.shape)
+    print(preds.shape)
 
     if prior_type in ["geo_net"] + ut.get_spa_enc_list():
         val_classes_ = np.concatenate(val_classes_list, axis=0)
-        logger.info(val_classes_.shape)
+        # logger.info(val_classes_.shape)
         # ranks: np.array(), [batch_size], the rank of the correct class label for each sample, start from 1
         ranks = get_label_rank(loc_pred=preds, loc_class=val_classes_)
         inds_list = np.concatenate(inds_list, axis=0)
     else:
-        logger.info(val_classes.shape)
+        # logger.info(val_classes.shape)
         # ranks: np.array(), [batch_size], the rank of the correct class label for each sample, start from 1
         ranks = get_label_rank(loc_pred=preds, loc_class=val_classes)
         inds_list = None
@@ -238,12 +240,14 @@ def compute_acc_batch(
         results_df.to_csv(results_csv_path, index=True)
 
         # Logging the information
-        logger.info(f"Save results to {results_csv_path}")
+        # logger.info(f"Save results to {results_csv_path}")
+        print(f"Save results to {results_csv_path}")
 
     # print final accuracy
     # some datasets have mutiple splits. These are represented by integers for each example in val_split
     for ii, split in enumerate(np.unique(val_split)):
-        logger.info(" Split ID: {}".format(ii))
+        # logger.info(" Split ID: {}".format(ii))
+        print(" Split ID: {}".format(ii))
         inds1 = np.where(val_split == split)[0]
         if inds_list is not None:
             inds2 = sorted(list(set(list(inds1)).intersection(set(list(inds_list)))))
@@ -251,8 +255,16 @@ def compute_acc_batch(
             inds = [idx_map[idx] for idx in inds2]
         else:
             inds = inds1
+        # for kk in np.sort(list(top_k_acc.keys())):
+            # logger.info(
+            #     " Top {}\t{}acc (%):   {}".format(
+            #         kk,
+            #         eval_flag_str,
+            #         round(top_k_acc[kk][inds].sum() * 100 / len(inds1), 2),
+            #     )
+            # )
         for kk in np.sort(list(top_k_acc.keys())):
-            logger.info(
+            print(
                 " Top {}\t{}acc (%):   {}".format(
                     kk,
                     eval_flag_str,
@@ -280,10 +292,10 @@ def compute_regression_acc(params, model, val_feats, val_locs, val_labels,logger
     mae = mean_absolute_error(val_labels.cpu().numpy(), predictions.squeeze().cpu().detach().numpy())
     rmse = mean_squared_error(val_labels.cpu().numpy(), predictions.squeeze().cpu().detach().numpy(), squared=False)
 
-    logger.info("Final regression evaluation results on test:")
-    logger.info(f"R2: {r2}")
-    logger.info(f"MAE: {mae}")
-    logger.info(f"RMSE: {rmse}")
+    # logger.info("Final regression evaluation results on test:")
+    # logger.info(f"R2: {r2}")
+    # logger.info(f"MAE: {mae}")
+    # logger.info(f"RMSE: {rmse}")
 
     # Save results to CSV if required
     if params['save_results']:
@@ -434,10 +446,17 @@ def compute_acc(
                 top_k_acc[kk][ind] = 1
 
     for ii, split in enumerate(np.unique(val_split)):
-        logger.info(" Split ID: {}".format(ii))
+        # logger.info(" Split ID: {}".format(ii))
+        print(" Split ID: {}".format(ii))
         inds = np.where(val_split == split)[0]
+        # for kk in np.sort(list(top_k_acc.keys())):
+        #     # logger.info(
+        #         " Top {}\t{}acc (%):   {}".format(
+        #             kk, eval_flag_str, round(top_k_acc[kk][inds].mean() * 100, 2)
+        #         )
+        #     )
         for kk in np.sort(list(top_k_acc.keys())):
-            logger.info(
+            print(
                 " Top {}\t{}acc (%):   {}".format(
                     kk, eval_flag_str, round(top_k_acc[kk][inds].mean() * 100, 2)
                 )
@@ -513,10 +532,17 @@ def compute_acc_predict_result(
     results_df.to_csv(f"../eval_results/eval_{params['dataset']}_{params['meta_type']}_{params['eval_split']}_{params['spa_enc_type']}.csv", index=True)
 
     for ii, split in enumerate(np.unique(val_split)):
-        logger.info(" Split ID: {}".format(ii))
+        # logger.info(" Split ID: {}".format(ii))
+        print(" Split ID: {}".format(ii))
         inds = np.where(val_split == split)[0]
+        # for kk in np.sort(list(top_k_acc.keys())):
+        #     # logger.info(
+        #         " Top {}\t{}acc (%):   {}".format(
+        #             kk, eval_flag_str, round(top_k_acc[kk][inds].mean() * 100, 2)
+        #         )
+        #     )
         for kk in np.sort(list(top_k_acc.keys())):
-            logger.info(
+            print(
                 " Top {}\t{}acc (%):   {}".format(
                     kk, eval_flag_str, round(top_k_acc[kk][inds].mean() * 100, 2)
                 )
@@ -666,10 +692,17 @@ def compute_acc_and_rank(
     # print final accuracy
     # some datasets have mutiple splits. These are represented by integers for each example in val_split
     for ii, split in enumerate(np.unique(val_split)):
-        logger.info(" Split ID: {}".format(ii))
+        # logger.info(" Split ID: {}".format(ii))
+        print(" Split ID: {}".format(ii))
         inds = np.where(val_split == split)[0]
+        # for kk in np.sort(list(top_k_acc.keys())):
+        #     # logger.info(
+        #         " Top {}\t{}acc (%):   {}".format(
+        #             kk, eval_flag_str, round(top_k_acc[kk][inds].mean() * 100, 2)
+        #         )
+        #     )
         for kk in np.sort(list(top_k_acc.keys())):
-            logger.info(
+            print(
                 " Top {}\t{}acc (%):   {}".format(
                     kk, eval_flag_str, round(top_k_acc[kk][inds].mean() * 100, 2)
                 )

@@ -1,4 +1,5 @@
 _build
 .gitignore
-data/*
+data/
 47020978
+.DS_Store

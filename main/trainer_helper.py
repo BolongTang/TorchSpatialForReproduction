@@ -65,7 +65,15 @@ def unsupervise_train(
         if (batch_idx % params["log_frequency"] == 0 and batch_idx != 0) or (
             batch_idx == (len(data_loader) - 1)
         ):
-            logger.info(
+            # logger.info(
+            #     "[{}/{}]\tUnsupervised {} Loss  : {:.4f}".format(
+            #         batch_idx * params["batch_size"],
+            #         len(data_loader.dataset),
+            #         params["unsuper_loss"],
+            #         loss_avg.avg,
+            #     )
+            # )
+            print(
                 "[{}/{}]\tUnsupervised {} Loss  : {:.4f}".format(
                     batch_idx * params["batch_size"],
                     len(data_loader.dataset),
@@ -113,7 +121,12 @@ def unsupervise_eval(model, data_loader, params, logger=None):
 
             loss_avg.update(loss.item(), len(loc_feat))
 
-    logger.info(
+    # logger.info(
+    #     "Unsupervised {} Test loss   : {:.4f}".format(
+    #         params["unsuper_loss"], loss_avg.avg
+    #     )
+    # )
+    print(
         "Unsupervised {} Test loss   : {:.4f}".format(
             params["unsuper_loss"], loss_avg.avg
         )
@@ -186,7 +199,14 @@ def train(
         if (batch_idx % params["log_frequency"] == 0 and batch_idx != 0) or (
             batch_idx == (len(data_loader) - 1)
         ):
-            logger.info(
+            # logger.info(
+            #     "[{}/{}]\tLoss  : {:.4f}".format(
+            #         batch_idx * params["batch_size"],
+            #         len(data_loader.dataset),
+            #         loss_avg.avg,
+            #     )
+            # )
+            print(
                 "[{}/{}]\tLoss  : {:.4f}".format(
                     batch_idx * params["batch_size"],
                     len(data_loader.dataset),
@@ -242,7 +262,8 @@ def test(model, data_loader, params, logger=None):
 
                 loss_avg.update(loss.item(), loc_feat.shape[0])
 
-    logger.info("Test loss   : {:.4f}".format(loss_avg.avg))
+    # logger.info("Test loss   : {:.4f}".format(loss_avg.avg))
+    print("Test loss   : {:.4f}".format(loss_avg.avg))
 
 
 def plot_gt_locations(

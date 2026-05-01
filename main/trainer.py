@@ -23,7 +23,6 @@ from sampler import *
 
 import pandas as pd
 
-
 def make_args_parser():
     parser = ArgumentParser()
     parser.add_argument(
@@ -601,13 +600,13 @@ class Trainer:
 
         self.make_model_file(params)
 
-        self.logger = self.make_logger(params)
+        # self.logger = self.make_logger(params)
 
         if params["dataset"] not in params["regress_dataset"]:
             self.make_image_dir(params)
             self.process_users(params)
 
-        self.log_dataset_status(params, logger=self.logger)
+        # self.log_dataset_status(params, # logger=self.logger)
 
         self.load_ocean_mask()
 
@@ -817,22 +816,22 @@ class Trainer:
             assert params["num_users"] != 1
         return
 
-    def log_dataset_status(self, params, logger):
+    # def log_dataset_status(self, params, logger):
         # print stats
-        if params["dataset"] not in params["regress_dataset"]:
-            logger.info("\nnum_classes\t{}".format(params["num_classes"]))
-            logger.info("num train    \t{}".format(len(self.op["train_locs"])))
-            logger.info("num val      \t{}".format(len(self.op["val_locs"])))
-            logger.info("train loss   \t" + params["train_loss"])
-            logger.info("model name   \t" + params["model_file_name"])
-            logger.info("num users    \t{}".format(params["num_users"]))
-            if params["meta_type"] != "":
-                logger.info("meta data    \t" + params["meta_type"])
-        else:
-            logger.info("num train    \t{}".format(len(self.op["train_locs"])))
-            logger.info("num val      \t{}".format(len(self.op["val_locs"])))
-            logger.info("train loss   \t" + params["train_loss"])
-            logger.info("model name   \t" + params["model_file_name"])
+        # if params["dataset"] not in params["regress_dataset"]:
+            # logger.info("\nnum_classes\t{}".format(params["num_classes"]))
+            # logger.info("num train    \t{}".format(len(self.op["train_locs"])))
+            # logger.info("num val      \t{}".format(len(self.op["val_locs"])))
+            # logger.info("train loss   \t" + params["train_loss"])
+            # logger.info("model name   \t" + params["model_file_name"])
+            # logger.info("num users    \t{}".format(params["num_users"]))
+            # if params["meta_type"] != "":
+                # logger.info("meta data    \t" + params["meta_type"])
+        # else:
+            # logger.info("num train    \t{}".format(len(self.op["train_locs"])))
+            # logger.info("num val      \t{}".format(len(self.op["val_locs"])))
+            # logger.info("train loss   \t" + params["train_loss"])
+            # logger.info("model name   \t" + params["model_file_name"])
 
     def load_ocean_mask(self):
         # load ocean mask for plotting
@@ -1010,7 +1009,7 @@ class Trainer:
 
 
     def create_train_sample_data_loader(self, params):
-        print("Resample at scale: ", params["train_sample_ratio"],params["spa_enc_type"],"Using the sammpling method: ",params["train_sample_method"])
+        print("Resample at scale: ", params["train_sample_ratio"],params["spa_enc_type"],"Using the sampling method: ",params["train_sample_method"])
         if (
             params["train_sample_ratio"] < 1.0
             and params["train_sample_ratio"] > 0
@@ -1345,14 +1344,14 @@ class Trainer:
                 )
 
             for epoch in range(0, self.params["num_epochs_unsuper"]):
-                self.logger.info("\nUnsupervised Training Epoch\t{}".format(epoch))
+                # # self.# logger.info("\nUnsupervised Training Epoch\t{}".format(epoch))
                 unsupervise_train(
                     model=self.loc_enc_model,
                     data_loader=self.train_loader,
                     optimizer=self.optimizer,
                     epoch=epoch,
                     params=self.params,
-                    logger=self.logger,
+                    # logger=self.logger,
                     neg_rand_type=self.params["neg_rand_type"],
                 )
 
@@ -1363,7 +1362,8 @@ class Trainer:
                 ):
                     self.save_model(unsuper_model=True, cur_epoch=epoch)
 
-            self.save_model(unsuper_model=True)
+            if self.params["spa_enc_type"] != "no_prior":
+                self.save_model(unsuper_model=True)
 
     def   run_super_train(self):
         if self.params["unsuper_loss"] != "none":
@@ -1385,7 +1385,7 @@ class Trainer:
 
         # main train loop
         for epoch in range(self.epoch, self.epoch + self.params["num_epochs"]):
-            self.logger.info("\nEpoch\t{}".format(epoch))
+            # self.# logger.info("\nEpoch\t{}".format(epoch))
             if self.regress_enc_model is None:
                 train(
                     model=self.loc_enc_model,
@@ -1393,14 +1393,14 @@ class Trainer:
                     optimizer=self.optimizer,
                     epoch=epoch,
                     params=self.params,
-                    logger=self.logger,
+                    # logger=self.logger,
                     neg_rand_type=self.params["neg_rand_type"],
                 )
                 test(
                     model=self.loc_enc_model,
                     data_loader=self.val_loader,
                     params=self.params,
-                    logger=self.logger,
+                    # logger=self.logger,
                 )
 
                 if epoch % self.params["eval_frequency"] == 0 and epoch != 0 and self.params['dataset'] not in self.params['regress_dataset']:
@@ -1417,14 +1417,14 @@ class Trainer:
                     optimizer=self.optimizer,
                     epoch=epoch,
                     params=self.params,
-                    logger=self.logger,
+                    # logger=self.logger,
                     neg_rand_type=self.params["neg_rand_type"],
                 )
                 test(
                     model=self.regress_enc_model,
                     data_loader=self.val_loader,
                     params=self.params,
-                    logger=self.logger,
+                    # logger=self.logger,
                 )
 
                 if epoch % self.params["eval_frequency"] == 0 and epoch != 0 and self.params['dataset'] not in self.params['regress_dataset']:
@@ -1436,8 +1436,9 @@ class Trainer:
                     #     self.save_model(unsuper_model = False, cur_epoch = epoch)
 
             self.epoch += 1
-
-        self.save_model(unsuper_model=False)
+        
+        if self.params["spa_enc_type"] != "no_prior":
+            self.save_model(unsuper_model=False)
 
     def run_train(self):
         if self.params["load_unsuper_model"]:
@@ -1452,11 +1453,12 @@ class Trainer:
         if self.params["do_super_train"]:
             self.run_super_train()
 
-        self.save_model()
+        if self.params["spa_enc_type"] != "no_prior":
+            self.save_model()
 
     def plot_time_preidction(self):
         if self.params["use_date_feats"]:
-            self.logger.info("\nGenerating predictions for each month of the year.")
+            # self.# logger.info("\nGenerating predictions for each month of the year.")
             if not os.path.isdir(self.op_dir + "time/"):
                 os.makedirs(self.op_dir + "time/")
             for ii, tm in enumerate(np.linspace(0, 1, 13)):
@@ -1486,11 +1488,11 @@ class Trainer:
 
         if model_file_name is not None:
             if os.path.exists(model_file_name):
-                self.logger.info("\nOnly {}".format(self.params["spa_enc_type"]))
-                self.logger.info(" Model :\t" + os.path.basename(model_file_name))
+                # self.# logger.info("\nOnly {}".format(self.params["spa_enc_type"]))
+                # self.# logger.info(" Model :\t" + os.path.basename(model_file_name))
 
                 net_params = torch.load(
-                    model_file_name, map_location=torch.device(self.params["device"])
+                    model_file_name, map_location=torch.device(self.params["device"]), weights_only = False
                 )
                 # params = net_params['params']
                 # for key in params:
@@ -1501,18 +1503,18 @@ class Trainer:
                 self.loc_enc_model.load_state_dict(net_params["state_dict"])
                 self.optimizer.load_state_dict(net_params["optimizer"])
             else:
-                self.logger.info(
-                    f"Cannot load model since it not exist - {model_file_name}"
-                )
+                # self.# logger.info(
+                #     f"Cannot load model since it not exist - {model_file_name}"
+                # )
                 raise FileNotFoundError(
                     f"Model file does not exist - {model_file_name}"
                 )
         else:
             if unsuper_model:
-                self.logger.info("Cannot load unsupervised model!")
+                # self.# logger.info("Cannot load unsupervised model!")
                 raise ValueError("Cannot load unsupervised model!")
             else:
-                self.logger.info("Cannot load model!")
+                # self.# logger.info("Cannot load model!")
                 raise ValueError("Cannot load model!")
 
     def save_model(self, unsuper_model=False, cur_epoch=None):
@@ -1528,7 +1530,7 @@ class Trainer:
 
         if model_file_name is not None:
             # save trained model
-            self.logger.info("Saving output model to " + model_file_name)
+            # self.# logger.info("Saving output model to " + model_file_name)
             op_state = {
                 "epoch": self.epoch + 1,
                 "state_dict": self.loc_enc_model.state_dict(),
@@ -1536,11 +1538,11 @@ class Trainer:
                 "params": self.params,
             }
             torch.save(op_state, model_file_name)
-        else:
-            if unsuper_model:
-                self.logger.info("Cannot save unsupervised model!")
-            else:
-                self.logger.info("Cannot save model!")
+        # else:
+            # if unsuper_model:
+            #     # self.# logger.info("Cannot save unsupervised model!")
+            # else:
+            #     # self.# logger.info("Cannot save model!")
 
     def load_baseline_hyperparameter(self):
         # these hyper parameters have been cross validated for the baseline methods
@@ -1563,34 +1565,35 @@ class Trainer:
 
         nn_model_path = self.params["model_file_name"]
 
-        self.logger.info("\n{}".format(spa_enc_type))
-        self.logger.info(" Model :\t" + os.path.basename(nn_model_path))
-        self.logger.info(
-            f"""Evaluation on {self.params["eval_split"]} with invalid sample removed"""
-        )
+        # self.# logger.info("\n{}".format(spa_enc_type))
+        # self.# logger.info(" Model :\t" + os.path.basename(nn_model_path))
+        # self.# logger.info(
+        #     f"""Evaluation on {self.params["eval_split"]} with invalid sample removed"""
+        # )
 
-        net_params = torch.load(nn_model_path)
+        net_params = torch.load(nn_model_path, weights_only = False)
         self.params = net_params["params"]
 
         # construct features
         # val_feats_net: shape [batch_size, 2], torch.tensor
         val_feats_net = self.val_loc_feats
 
-        self.loc_enc_model.load_state_dict(net_params["state_dict"])
-        self.loc_enc_model.eval()
-        val_preds_final = compute_acc_batch(
-            val_preds=self.val_preds,
-            val_classes=self.op["val_classes"],
-            val_split=self.op["eval_split"],
-            val_feats=self.val_loc_feats,
-            train_classes=None,
-            train_feats=None,
-            prior_type=spa_enc_type,
-            prior=self.loc_enc_model,
-            batch_size=self.params["batch_size"],
-            logger=self.logger,
-            eval_flag_str="Estimate\t",
-        )
+        if self.params["spa_enc_type"] != "no_prior":
+            self.loc_enc_model.load_state_dict(net_params["state_dict"])
+            self.loc_enc_model.eval()
+            val_preds_final = compute_acc_batch(
+                val_preds=self.val_preds,
+                val_classes=self.op["val_classes"],
+                val_split=self.op["eval_split"],
+                val_feats=self.val_loc_feats,
+                train_classes=None,
+                train_feats=None,
+                prior_type=spa_enc_type,
+                prior=self.loc_enc_model,
+                batch_size=self.params["batch_size"],
+                # logger=self.logger,
+                eval_flag_str="Estimate\t",
+            )
 
         # if save_eval:
         #     pred_no_prior = self.run_eval_baseline(spa_enc_type = 'no_prior')
@@ -1655,7 +1658,7 @@ class Trainer:
             # no prior
             #
             if "no_prior" in spa_enc_type_list:
-                self.logger.info("\nNo prior")
+                # # self.# logger.info("\nNo prior")
                 pred_no_prior = compute_acc_batch(
                     params=self.params,
                     val_preds=op["val_preds"],
@@ -1668,7 +1671,7 @@ class Trainer:
                     prior=None,
                     hyper_params=None,
                     batch_size=1024,
-                    logger=self.logger,
+                    ## logger=self.logger,
                     eval_flag_str=eval_flag_str,
                 )
 
@@ -1676,7 +1679,7 @@ class Trainer:
             # overall training frequency prior
             #
             if "train_freq" in spa_enc_type_list:
-                self.logger.info("\nTrain frequency prior")
+                # # self.# logger.info("\nTrain frequency prior")
                 # weight the eval predictions by the overall frequency of each class at train time
                 cls_id, cls_cnt = np.unique(self.op["train_classes"], return_counts=True)
                 train_prior = np.ones(self.params["num_classes"])
@@ -1690,7 +1693,7 @@ class Trainer:
                         val_split=op["val_split"],
                         prior_type="train_freq",
                         prior=train_prior,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 else:
@@ -1700,7 +1703,7 @@ class Trainer:
                         val_split=op["val_split"],
                         prior_type="train_freq",
                         prior=train_prior,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
 
@@ -1717,9 +1720,9 @@ class Trainer:
                     self.params["model_dir"], self.params["dataset"], meta_str
                 )
 
-                self.logger.info("\nTang et al. prior")
-                self.logger.info("  using model :\t" + os.path.basename(nn_model_path_tang))
-                net_params = torch.load(nn_model_path_tang)
+                # self.# logger.info("\nTang et al. prior")
+                # self.# logger.info("  using model :\t" + os.path.basename(nn_model_path_tang))
+                net_params = torch.load(nn_model_path_tang, weights_only = False)
                 params = net_params["params"]
 
                 # construct features
@@ -1746,7 +1749,7 @@ class Trainer:
                         val_split=op["val_split"],
                         prior_type="train_freq",
                         prior=train_prior,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 else:
@@ -1757,7 +1760,7 @@ class Trainer:
                         val_feats=val_feats_tang,
                         prior_type="tang_et_al",
                         prior=model,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 del val_feats_tang  # save memory
@@ -1766,7 +1769,7 @@ class Trainer:
             # discretized grid prior
             #
             if "grid" in spa_enc_type_list:
-                self.logger.info("\nDiscrete grid prior")
+                # self.# logger.info("\nDiscrete grid prior")
                 gp = bl.GridPrior(
                     self.op["train_locs"],
                     self.op["train_classes"],
@@ -1783,7 +1786,7 @@ class Trainer:
                         prior_type="grid",
                         prior=gp,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 else:
@@ -1795,7 +1798,7 @@ class Trainer:
                         prior_type="grid",
                         prior=gp,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
 
@@ -1816,7 +1819,7 @@ class Trainer:
             # nearest neighbor prior - based on KNN
             #
             if "nn_knn" in spa_enc_type_list:
-                self.logger.info("\nNearest neighbor KNN prior")
+                # self.# logger.info("\nNearest neighbor KNN prior")
                 if self.params["save_results"]:
                     compute_acc_predict_result(
                         params=self.params,
@@ -1828,7 +1831,7 @@ class Trainer:
                         prior_type="nn_knn",
                         prior=nn_tree,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 else:
@@ -1841,7 +1844,7 @@ class Trainer:
                         prior_type="nn_knn",
                         prior=nn_tree,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
 
@@ -1849,7 +1852,7 @@ class Trainer:
             # nearest neighbor prior - based on distance
             #
             if "nn_dist" in spa_enc_type_list:
-                self.logger.info("\nNearest neighbor distance prior")
+                # self.# logger.info("\nNearest neighbor distance prior")
                 if self.params["save_results"]:
                     compute_acc_predict_result(
                         params=self.params,
@@ -1861,7 +1864,7 @@ class Trainer:
                         prior_type="nn_dist",
                         prior=nn_tree,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 else:
@@ -1874,7 +1877,7 @@ class Trainer:
                         prior_type="nn_dist",
                         prior=nn_tree,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
 
@@ -1882,7 +1885,7 @@ class Trainer:
             # kernel density estimate e.g. BirdSnap CVPR 2014
             #
             if "kde" in spa_enc_type_list:
-                self.logger.info("\nKernel density estimate prior")
+                # self.# logger.info("\nKernel density estimate prior")
                 kde_params = {}
                 train_classes_kde, train_locs_kde, kde_params["counts"] = (
                     bl.create_kde_grid(
@@ -1913,7 +1916,7 @@ class Trainer:
                         prior_type="kde",
                         prior=kde_params,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
                 else:
@@ -1927,7 +1930,7 @@ class Trainer:
                         prior_type="kde",
                         prior=kde_params,
                         hyper_params=self.hyper_params,
-                        logger=self.logger,
+                        # logger=self.logger,
                         eval_flag_str=eval_flag_str,
                     )
 
@@ -1950,7 +1953,8 @@ class Trainer:
                         val_labels=self.val_labels,
                         # prior_type="train_freq",
                         # prior=train_prior,
-                        logger=self.logger,)
+                        # logger=self.logger,
+                        )
 
     
         
@@ -1971,7 +1975,9 @@ class Trainer:
             device=self.params["device"],
         )
 
-        self.loc_enc_model.eval()
+        if self.params["spa_enc_type"] != "no_prior":
+            self.loc_enc_model.eval()
+        
         if self.params["save_results"]:
             val_preds_final = compute_acc_predict_result(
                 params=self.params,
@@ -1981,7 +1987,7 @@ class Trainer:
                 val_feats=val_loc_feats,
                 prior_type=spa_enc_type,
                 prior=self.loc_enc_model,
-                logger=self.logger,
+                # logger=self.logger,
                 eval_flag_str=eval_flag_str,
             )
         else:
@@ -1992,7 +1998,7 @@ class Trainer:
                 val_feats=val_loc_feats,
                 prior_type=spa_enc_type,
                 prior=self.loc_enc_model,
-                logger=self.logger,
+                # logger=self.logger,
                 eval_flag_str=eval_flag_str,
             )
 
@@ -2015,7 +2021,9 @@ class Trainer:
             device=self.params["device"],
         )
 
-        self.loc_enc_model.eval()
+        if self.params["spa_enc_type"] != "no_prior":
+            self.loc_enc_model.eval()
+            
         val_preds_final, val_ranks = compute_acc_and_rank(
             val_preds=op["val_preds"],
             val_classes=op["val_classes"],
@@ -2023,7 +2031,7 @@ class Trainer:
             val_feats=val_loc_feats,
             prior_type=spa_enc_type,
             prior=self.loc_enc_model,
-            logger=self.logger,
+            # logger=self.logger,
             eval_flag_str=eval_flag_str,
         )
 
@@ -2052,8 +2060,9 @@ class Trainer:
                 params=self.params,
                 device=self.params["device"],
             )
-
-            self.loc_enc_model.eval()
+            
+            if self.params["spa_enc_type"] != "no_prior":
+                self.loc_enc_model.eval()
 
             val_preds = compute_acc_batch(
                 params=self.params,
@@ -2067,7 +2076,7 @@ class Trainer:
                 prior=self.loc_enc_model,
                 hyper_params=None,
                 batch_size=1024,
-                logger=self.logger,
+                # logger=self.logger,
                 eval_flag_str=eval_flag_str,
             )
 
